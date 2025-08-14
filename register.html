@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Create your account</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <script type="module">
+    import { requireGuest, saveUser } from "./auth.js";
+    import { BMS } from "./api.js";
+    import { CONFIG } from "./config.js";
+
+    requireGuest();
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("form-register");
+      const status = document.getElementById("status");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        status.innerHTML = "";
+        const fd = new FormData(form);
+        const payload = {
+          username: fd.get("username").trim(),
+          name: fd.get("name").trim(),
+          phone: fd.get("phone").trim(),
+          password: fd.get("password"),
+          email: fd.get("email").trim(),
+        };
+
+        // basic client-side checks
+        if (!payload.username || !payload.name || !payload.phone || !payload.password || !payload.email) {
+          status.innerHTML = `<div class="alert error">All fields are required.</div>`;
+          return;
+        }
+
+        try {
+          form.querySelector("button[type=submit]").disabled = true;
+          const { user } = await BMS.registerCustomer(payload);
+          saveUser(user);
+          window.location.replace(CONFIG.ROUTES.dashboard);
+        } catch (err) {
+          status.innerHTML = `<div class="alert error">${err.message || "Registration failed"}</div>`;
+        } finally {
+          form.querySelector("button[type=submit]").disabled = false;
+        }
+      });
+    });
+  </script>
+</head>
+<body class="center">
+  <div class="card">
+    <h1>Create account</h1>
+    <p class="lead">Register to access your dashboard.</p>
+
+    <form id="form-register" class="form" autocomplete="off" novalidate>
+      <div class="row">
+        <div>
+          <label>Username</label>
+          <input class="input" name="username" placeholder="jdoe" required />
+        </div>
+        <div>
+          <label>Full name</label>
+          <input class="input" name="name" placeholder="John Doe" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Phone</label>
+          <input class="input" name="phone" placeholder="919876543210" required />
+        </div>
+        <div>
+          <label>Email</label>
+          <input class="input" type="email" name="email" placeholder="john@example.com" required />
+        </div>
+      </div>
+
+      <div>
+        <label>Password</label>
+        <input class="input" type="password" name="password" placeholder="••••••••" required minlength="6"/>
+      </div>
+
+      <div id="status"></div>
+
+      <button class="btn" type="submit">Create account</button>
+      <div class="note">Already have an account? <a class="link" href="./login.html">Sign in</a></div>
+    </form>
+  </div>
+</body>
+</html>
