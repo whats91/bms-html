@@ -34,6 +34,36 @@ body{
   padding:24px;
 }
 
+.auth-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:100dvh;
+}
+
+.auth-hero{
+  background:linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+  text-align:center;
+}
+
+.auth-card{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+}
+
+.auth-card .card{ width:100%; max-width:420px; }
+
+@media(max-width:768px){
+  .auth-layout{ grid-template-columns:1fr; }
+  .auth-hero{ display:none; }
+}
+
 .card{
   width:min(100%, 520px);
   background:var(--card);
