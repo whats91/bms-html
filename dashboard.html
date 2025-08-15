@@ -82,12 +82,12 @@
           const fd = new FormData(e.currentTarget);
           const payload = {
             customer_uid: user.uid,
-            username: fd.get("username").trim(),
-            name: fd.get("name").trim(),
-            phone: fd.get("phone").trim(),
-            email: fd.get("email").trim(),
+            username: (fd.get("username") || "").toString().trim(),
+            name: (fd.get("name") || "").toString().trim(),
+            phone: (fd.get("phone") || "").toString().trim(),
+            email: (fd.get("email") || "").toString().trim(),
           };
-          const pwd = fd.get("password");
+          const pwd = (fd.get("password") || "").toString();
           if (pwd) payload.password = pwd;
 
           try {

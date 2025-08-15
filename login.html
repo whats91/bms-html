@@ -22,8 +22,8 @@
 
         const fd = new FormData(form);
         const payload = {
-          phone: fd.get("phone").trim(),
-          password: fd.get("password"),
+          phone: (fd.get("phone") || "").toString().trim(),
+          password: (fd.get("password") || "").toString(),
         };
 
         if (!payload.phone || !payload.password) {
