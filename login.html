@@ -5,42 +5,45 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Sign in</title>
   <link rel="stylesheet" href="./styles.css"/>
-  <script type="module">
-    import { requireGuest, saveUser } from "./auth.js";
-    import { BMS } from "./api.js";
-    import { CONFIG } from "./config.js";
+  <script src="./config.js"></script>
+  <script src="./api.js"></script>
+  <script src="./auth.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      requireGuest();
+      
+      var form = document.getElementById("form-login");
+      var status = document.getElementById("status");
 
-    requireGuest();
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("form-login");
-      const status = document.getElementById("status");
-
-      form.addEventListener("submit", async (e) => {
+      form.addEventListener("submit", function(e) {
         e.preventDefault();
         status.innerHTML = "";
 
-        const fd = new FormData(form);
-        const payload = {
+        var fd = new FormData(form);
+        var payload = {
           phone: fd.get("phone").trim(),
           password: fd.get("password"),
         };
 
         if (!payload.phone || !payload.password) {
-          status.innerHTML = `<div class="alert error">Phone and password are required.</div>`;
+          status.innerHTML = '<div class="alert error">Phone and password are required.</div>';
           return;
         }
 
-        try {
-          form.querySelector("button[type=submit]").disabled = true;
-          const { user } = await BMS.loginCustomer(payload);
-          saveUser(user);
-          window.location.replace(CONFIG.ROUTES.dashboard);
-        } catch (err) {
-          status.innerHTML = `<div class="alert error">${err.message || "Login failed"}</div>`;
-        } finally {
-          form.querySelector("button[type=submit]").disabled = false;
-        }
+        var submitBtn = form.querySelector("button[type=submit]");
+        submitBtn.disabled = true;
+        
+        BMS.loginCustomer(payload)
+          .then(function(data) {
+            saveUser(data.user);
+            window.location.replace(CONFIG.ROUTES.dashboard);
+          })
+          .catch(function(err) {
+            status.innerHTML = '<div class="alert error">' + (err.message || "Login failed") + '</div>';
+          })
+          .finally(function() {
+            submitBtn.disabled = false;
+          });
       });
     });
   </script>

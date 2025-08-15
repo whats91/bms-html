@@ -5,22 +5,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Create your account</title>
   <link rel="stylesheet" href="./styles.css"/>
-  <script type="module">
-    import { requireGuest, saveUser } from "./auth.js";
-    import { BMS } from "./api.js";
-    import { CONFIG } from "./config.js";
+  <script src="./config.js"></script>
+  <script src="./api.js"></script>
+  <script src="./auth.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      requireGuest();
+      
+      var form = document.getElementById("form-register");
+      var status = document.getElementById("status");
 
-    requireGuest();
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("form-register");
-      const status = document.getElementById("status");
-
-      form.addEventListener("submit", async (e) => {
+      form.addEventListener("submit", function(e) {
         e.preventDefault();
         status.innerHTML = "";
-        const fd = new FormData(form);
-        const payload = {
+        var fd = new FormData(form);
+        var payload = {
           username: fd.get("username").trim(),
           name: fd.get("name").trim(),
           phone: fd.get("phone").trim(),
@@ -30,20 +29,24 @@
 
         // basic client-side checks
         if (!payload.username || !payload.name || !payload.phone || !payload.password || !payload.email) {
-          status.innerHTML = `<div class="alert error">All fields are required.</div>`;
+          status.innerHTML = '<div class="alert error">All fields are required.</div>';
           return;
         }
 
-        try {
-          form.querySelector("button[type=submit]").disabled = true;
-          const { user } = await BMS.registerCustomer(payload);
-          saveUser(user);
-          window.location.replace(CONFIG.ROUTES.dashboard);
-        } catch (err) {
-          status.innerHTML = `<div class="alert error">${err.message || "Registration failed"}</div>`;
-        } finally {
-          form.querySelector("button[type=submit]").disabled = false;
-        }
+        var submitBtn = form.querySelector("button[type=submit]");
+        submitBtn.disabled = true;
+        
+        BMS.registerCustomer(payload)
+          .then(function(data) {
+            saveUser(data.user);
+            window.location.replace(CONFIG.ROUTES.dashboard);
+          })
+          .catch(function(err) {
+            status.innerHTML = '<div class="alert error">' + (err.message || "Registration failed") + '</div>';
+          })
+          .finally(function() {
+            submitBtn.disabled = false;
+          });
       });
     });
   </script>

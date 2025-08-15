@@ -5,115 +5,122 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Dashboard</title>
   <link rel="stylesheet" href="./styles.css"/>
-  <script type="module">
-    import { requireAuth, getUser, saveUser, logout } from "./auth.js";
-    import { BMS } from "./api.js";
+  <script src="./config.js"></script>
+  <script src="./api.js"></script>
+  <script src="./auth.js"></script>
+  <script>
+    function loadUserCard() {
+      var localUser = getUser();
+      var view = document.getElementById("user-view");
+      var status = document.getElementById("status-get");
 
-    requireAuth();
+      status.innerHTML = "";
+      
+      BMS.getCustomer(localUser.uid)
+        .then(function(data) {
+          var user = data.user;
+          // Update local cache in case server has fresher values
+          saveUser(user);
 
-    async function loadUserCard() {
-      const localUser = getUser();
-      const view = document.getElementById("user-view");
-      const status = document.getElementById("status-get");
+          view.innerHTML = `
+            <div class="grid-2">
+              <div class="card">
+                <h2 style="margin-top:0">Profile</h2>
+                <div class="note">Basic information</div>
+                <div style="margin-top:12px; display:grid; gap:8px;">
+                  <div><strong>Name:</strong> ${user.name || "-"}</div>
+                  <div><strong>Username:</strong> ${user.username || "-"}</div>
+                  <div><strong>Email:</strong> ${user.email || "-"}</div>
+                  <div><strong>Phone:</strong> ${user.phone || "-"}</div>
+                  <div><strong>UID:</strong> <code>${user.uid}</code></div>
+                  <div><strong>Status:</strong> ${user.status === 1 ? "Active" : "Inactive"}</div>
+                </div>
+              </div>
+              <div class="card">
+                <h2 style="margin-top:0">Update Account</h2>
+                <div class="note">Edit your details below and save.</div>
 
-      try {
-        status.innerHTML = "";
-        const { user } = await BMS.getCustomer(localUser.uid);
-        // Update local cache in case server has fresher values
-        saveUser(user);
+                <form id="form-update" class="form" style="margin-top:12px;">
+                  <div class="row">
+                    <div>
+                      <label>Username</label>
+                      <input class="input" name="username" value="${user.username || ""}" required />
+                    </div>
+                    <div>
+                      <label>Full name</label>
+                      <input class="input" name="name" value="${user.name || ""}" required />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div>
+                      <label>Phone</label>
+                      <input class="input" name="phone" value="${user.phone || ""}" required />
+                    </div>
+                    <div>
+                      <label>Email</label>
+                      <input class="input" type="email" name="email" value="${user.email || ""}" required />
+                    </div>
+                  </div>
+                  <div>
+                    <label>New password (optional)</label>
+                    <input class="input" type="password" name="password" placeholder="Leave blank to keep current" />
+                  </div>
 
-        view.innerHTML = `
-          <div class="grid-2">
-            <div class="card">
-              <h2 style="margin-top:0">Profile</h2>
-              <div class="note">Basic information</div>
-              <div style="margin-top:12px; display:grid; gap:8px;">
-                <div><strong>Name:</strong> ${user.name || "-"}</div>
-                <div><strong>Username:</strong> ${user.username || "-"}</div>
-                <div><strong>Email:</strong> ${user.email || "-"}</div>
-                <div><strong>Phone:</strong> ${user.phone || "-"}</div>
-                <div><strong>UID:</strong> <code>${user.uid}</code></div>
-                <div><strong>Status:</strong> ${user.status === 1 ? "Active" : "Inactive"}</div>
+                  <div id="status-update"></div>
+                  <button class="btn" type="submit">Save changes</button>
+                </form>
               </div>
             </div>
-            <div class="card">
-              <h2 style="margin-top:0">Update Account</h2>
-              <div class="note">Edit your details below and save.</div>
+          `;
 
-              <form id="form-update" class="form" style="margin-top:12px;">
-                <div class="row">
-                  <div>
-                    <label>Username</label>
-                    <input class="input" name="username" value="${user.username || ""}" required />
-                  </div>
-                  <div>
-                    <label>Full name</label>
-                    <input class="input" name="name" value="${user.name || ""}" required />
-                  </div>
-                </div>
-                <div class="row">
-                  <div>
-                    <label>Phone</label>
-                    <input class="input" name="phone" value="${user.phone || ""}" required />
-                  </div>
-                  <div>
-                    <label>Email</label>
-                    <input class="input" type="email" name="email" value="${user.email || ""}" required />
-                  </div>
-                </div>
-                <div>
-                  <label>New password (optional)</label>
-                  <input class="input" type="password" name="password" placeholder="Leave blank to keep current" />
-                </div>
+          // Bind update form
+          document.getElementById("form-update").addEventListener("submit", function(e) {
+            e.preventDefault();
+            var formStatus = document.getElementById("status-update");
+            formStatus.innerHTML = "";
 
-                <div id="status-update"></div>
-                <button class="btn" type="submit">Save changes</button>
-              </form>
-            </div>
-          </div>
-        `;
+            var fd = new FormData(e.currentTarget);
+            var payload = {
+              customer_uid: user.uid,
+              username: fd.get("username").trim(),
+              name: fd.get("name").trim(),
+              phone: fd.get("phone").trim(),
+              email: fd.get("email").trim(),
+            };
+            var pwd = fd.get("password");
+            if (pwd) payload.password = pwd;
 
-        // Bind update form
-        document.getElementById("form-update").addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const formStatus = document.getElementById("status-update");
-          formStatus.innerHTML = "";
-
-          const fd = new FormData(e.currentTarget);
-          const payload = {
-            customer_uid: user.uid,
-            username: fd.get("username").trim(),
-            name: fd.get("name").trim(),
-            phone: fd.get("phone").trim(),
-            email: fd.get("email").trim(),
-          };
-          const pwd = fd.get("password");
-          if (pwd) payload.password = pwd;
-
-          try {
-            e.currentTarget.querySelector("button[type=submit]").disabled = true;
-            const res = await BMS.updateCustomer(payload);
-            saveUser(res.user);
-            formStatus.innerHTML = `<div class="alert success">Saved!</div>`;
-            await loadUserCard(); // re-render with latest data
-          } catch (err) {
-            formStatus.innerHTML = `<div class="alert error">${err.message || "Update failed"}</div>`;
-          } finally {
-            e.currentTarget.querySelector("button[type=submit]").disabled = false;
-          }
+            var submitBtn = e.currentTarget.querySelector("button[type=submit]");
+            submitBtn.disabled = true;
+            
+            BMS.updateCustomer(payload)
+              .then(function(res) {
+                saveUser(res.user);
+                formStatus.innerHTML = '<div class="alert success">Saved!</div>';
+                loadUserCard(); // re-render with latest data
+              })
+              .catch(function(err) {
+                formStatus.innerHTML = '<div class="alert error">' + (err.message || "Update failed") + '</div>';
+              })
+              .finally(function() {
+                submitBtn.disabled = false;
+              });
+          });
+        })
+        .catch(function(err) {
+          status.innerHTML = '<div class="alert error">' + (err.message || "Could not load profile") + '</div>';
         });
-
-      } catch (err) {
-        status.innerHTML = `<div class="alert error">${err.message || "Could not load profile"}</div>`;
-      }
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("DOMContentLoaded", function() {
+      requireAuth();
+      
       // Sidebar actions
-      document.getElementById("btn-logout").addEventListener("click", (e) => {
+      document.getElementById("btn-logout").addEventListener("click", function(e) {
         e.preventDefault();
         logout();
       });
+      
       loadUserCard();
     });
   </script>

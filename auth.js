@@ -1,10 +1,8 @@
 // auth.js
-import { CONFIG } from "./config.js";
+var KEY = "bms_user";
 
-const KEY = "bms_user";
-
-export function saveUser(user) {
-  const toSave = {
+function saveUser(user) {
+  var toSave = {
     id: user.id,
     uid: user.uid,
     name: user.name,
@@ -18,37 +16,37 @@ export function saveUser(user) {
   localStorage.setItem(KEY, JSON.stringify(toSave));
 }
 
-export function getUser() {
+function getUser() {
   try {
-    const raw = localStorage.getItem(KEY);
+    var raw = localStorage.getItem(KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch {
+  } catch (e) {
     return null;
   }
 }
 
-export function clearUser() {
+function clearUser() {
   localStorage.removeItem(KEY);
 }
 
-export function isLoggedIn() {
+function isLoggedIn() {
   return !!getUser();
 }
 
 // Page guards
-export function requireGuest() {
+function requireGuest() {
   if (isLoggedIn()) {
     window.location.replace(CONFIG.ROUTES.dashboard);
   }
 }
 
-export function requireAuth() {
+function requireAuth() {
   if (!isLoggedIn()) {
     window.location.replace(CONFIG.ROUTES.login);
   }
 }
 
-export function logout() {
+function logout() {
   clearUser();
   window.location.replace(CONFIG.ROUTES.login);
 }

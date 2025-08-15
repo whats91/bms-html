@@ -1,5 +1,5 @@
 // config.js
-export const CONFIG = {
+var CONFIG = {
   BASE_URL: "https://api.botmastersender.com/api", // no trailing slash on /api
   VERSION: "v1",
   PARTNER_UID: "7P9JVsXjnR9PzPdJnDfFns",

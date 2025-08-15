@@ -1,41 +1,46 @@
 // api.js
-import { CONFIG } from "./config.js";
+var apiUrl = function(action) {
+  return CONFIG.BASE_URL + "/" + CONFIG.VERSION + "/?action=" + encodeURIComponent(action);
+};
 
-const apiUrl = (action) => `${CONFIG.BASE_URL}/${CONFIG.VERSION}/?action=${encodeURIComponent(action)}`;
+function post(action, payload) {
+  payload = payload || {};
+  var body = JSON.stringify(Object.assign({
+    partner_uid: CONFIG.PARTNER_UID
+  }, payload));
 
-async function post(action, payload = {}) {
-  const body = JSON.stringify({
-    partner_uid: CONFIG.PARTNER_UID,
-    ...payload,
-  });
-
-  const res = await fetch(apiUrl(action), {
+  return fetch(apiUrl(action), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     // The API examples showed a Cookie header—NOT required for customer endpoints here.
-    body,
+    body: body
+  })
+  .then(function(res) {
+    // Network / transport level problems
+    if (!res.ok) {
+      return res.text().catch(function() { return ""; })
+        .then(function(text) {
+          throw new Error("HTTP " + res.status + ": " + (text || res.statusText));
+        });
+    }
+    
+    return res.json().catch(function() { return {}; });
+  })
+  .then(function(data) {
+    // Application-level success check
+    if (data && data.success !== true) {
+      throw new Error(data && data.message ? data.message : "Request failed");
+    }
+    return data;
   });
-
-  // Network / transport level problems
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
-  }
-
-  const data = await res.json().catch(() => ({}));
-  // Application-level success check
-  if (data?.success !== true) {
-    throw new Error(data?.message || "Request failed");
-  }
-  return data;
 }
 
-export const BMS = {
-  registerCustomer: (payload) => post("register_customer", payload),
-  loginCustomer: (payload) => post("login_customer", payload),
-  getCustomer: (customer_uid) => post("get_customer", { customer_uid }),
-  updateCustomer: (payload) => post("update_customer", payload),
-  updateCustomerStatus: (payload) => post("update_customer_status", payload),
+var BMS = {
+  registerCustomer: function(payload) { return post("register_customer", payload); },
+  loginCustomer: function(payload) { return post("login_customer", payload); },
+  getCustomer: function(customer_uid) { return post("get_customer", { customer_uid: customer_uid }); },
+  updateCustomer: function(payload) { return post("update_customer", payload); },
+  updateCustomerStatus: function(payload) { return post("update_customer_status", payload); }
 };
