@@ -13,8 +13,11 @@ function post(action, payload) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Origin": window.location.origin,
+      "Accept": "application/json"
     },
-    // The API examples showed a Cookie header—NOT required for customer endpoints here.
+    mode: "cors", // Explicitly request CORS mode
+    credentials: "include", // Include cookies if needed
     body: body
   })
   .then(function(res) {
