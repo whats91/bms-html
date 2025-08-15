@@ -21,11 +21,11 @@
         status.innerHTML = "";
         const fd = new FormData(form);
         const payload = {
-          username: fd.get("username").trim(),
-          name: fd.get("name").trim(),
-          phone: fd.get("phone").trim(),
-          password: fd.get("password"),
-          email: fd.get("email").trim(),
+          username: (fd.get("username") || "").toString().trim(),
+          name: (fd.get("name") || "").toString().trim(),
+          phone: (fd.get("phone") || "").toString().trim(),
+          password: (fd.get("password") || "").toString(),
+          email: (fd.get("email") || "").toString().trim(),
         };
 
         // basic client-side checks
