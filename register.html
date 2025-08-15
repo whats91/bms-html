@@ -48,44 +48,54 @@
     });
   </script>
 </head>
-<body class="center">
-  <div class="card">
-    <h1>Create account</h1>
-    <p class="lead">Register to access your dashboard.</p>
-
-    <form id="form-register" class="form" autocomplete="off" novalidate>
-      <div class="row">
-        <div>
-          <label>Username</label>
-          <input class="input" name="username" placeholder="jdoe" required />
-        </div>
-        <div>
-          <label>Full name</label>
-          <input class="input" name="name" placeholder="John Doe" required />
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>Phone</label>
-          <input class="input" name="phone" placeholder="919876543210" required />
-        </div>
-        <div>
-          <label>Email</label>
-          <input class="input" type="email" name="email" placeholder="john@example.com" required />
-        </div>
-      </div>
-
+<body>
+  <div class="auth-layout">
+    <div class="auth-hero">
       <div>
-        <label>Password</label>
-        <input class="input" type="password" name="password" placeholder="••••••••" required minlength="6"/>
+        <h2>Join BMS today</h2>
+        <p>Track and manage your accounts with ease.</p>
       </div>
+    </div>
+    <div class="auth-card">
+      <div class="card">
+        <h1>Create account</h1>
+        <p class="lead">Register to access your dashboard.</p>
 
-      <div id="status"></div>
+        <form id="form-register" class="form" autocomplete="off" novalidate>
+          <div class="row">
+            <div>
+              <label>Username</label>
+              <input class="input" name="username" placeholder="jdoe" required />
+            </div>
+            <div>
+              <label>Full name</label>
+              <input class="input" name="name" placeholder="John Doe" required />
+            </div>
+          </div>
 
-      <button class="btn" type="submit">Create account</button>
-      <div class="note">Already have an account? <a class="link" href="./login.html">Sign in</a></div>
-    </form>
+          <div class="row">
+            <div>
+              <label>Phone</label>
+              <input class="input" name="phone" placeholder="919876543210" required />
+            </div>
+            <div>
+              <label>Email</label>
+              <input class="input" type="email" name="email" placeholder="john@example.com" required />
+            </div>
+          </div>
+
+          <div>
+            <label>Password</label>
+            <input class="input" type="password" name="password" placeholder="••••••••" required minlength="6"/>
+          </div>
+
+          <div id="status"></div>
+
+          <button class="btn" type="submit">Create account</button>
+          <div class="note">Already have an account? <a class="link" href="./login.html">Sign in</a></div>
+        </form>
+      </div>
+    </div>
   </div>
 </body>
 </html>
